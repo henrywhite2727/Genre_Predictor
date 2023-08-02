@@ -28,15 +28,42 @@ Dnb = Song_data[36404:39369, :]
 Hardstyle = Song_data[39370:42305, :]
 
 # finding average metrics for each genre (and saving in one array)
-Genres=[DarkTrap, Und_rap,TrapMetal,Emo,Rap,RnB,Pop,Hiphop,Techhouse,Techno,Trance,Psytrance,Trap,Dnb,Hardstyle]
+Genres = [
+    DarkTrap,
+    Und_rap,
+    TrapMetal,
+    Emo,
+    Rap,
+    RnB,
+    Pop,
+    Hiphop,
+    Techhouse,
+    Techno,
+    Trance,
+    Psytrance,
+    Trap,
+    Dnb,
+    Hardstyle,
+]
 
-#looping over each genre
-for i in len(Genres):
-    #looping over each metric for each genre
-    genre=Genres[i]
-    for j in range(len(genre[0,:])):
-        
+N_gen = len(Genres)  # number of genres within the data set
+N_metrics = len(DarkTrap[0, :])  # number of metrics associated with each song
 
+all_avg_metrics = np.zeros(
+    (N_gen, N_metrics)
+)  # array that will hold the avg metrics for every single genre
+avg_metric = np.zeros(
+    N_metrics
+)  # array that will hold the average metrics for a SINGLE genre within the following loop
+
+# looping over each genre
+for i in range(len(Genres)):
+    genre = Genres[i]
+    # looping over each metric for each genre
+    for j in range(len(genre[0, :])):
+        avg_metric[j] = np.mean(genre[:, j])
+
+    all_avg_metrics[i, :] = avg_metric
 
 
 # plotting separation from averages for each genre to find outliers
