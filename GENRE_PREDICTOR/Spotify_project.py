@@ -9,6 +9,14 @@ Song_data = np.loadtxt(
     usecols=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
     encoding="utf8",
 )
+Song_names = np.loadtxt(
+    "data/genres_v2.csv",
+    dtype=str,
+    skiprows=1,
+    delimiter=",",
+    usecols=(19),
+    encoding="utf8",
+)
 
 # Splitting song data into genres (and ignoring unnecessary columns in data set)
 DarkTrap = Song_data[0:4578, :]
@@ -90,6 +98,54 @@ acoustic_avgs = all_avg_metrics[:, 6]
 speech_avgs = all_avg_metrics[:, 5]
 instrument_avgs = all_avg_metrics[:, 7]
 
+
+song_index = 200000  # initializing variable that holds the index of the song we are trying to predict the genre of
+
+# Creating genre predictor function
+def Genre_Predictor(song_name: str):
+    # finding specific song within data set
+    for i in range(len(Song_names)):
+        if song_name == Song_names[i]:
+            song_index = i
+            break
+    if song_index == 200000:
+        print(
+            "Song name provided is not in the catalogued list so is not a valid input."
+        )
+
+    # calculating similarity scores for energy, acoustic, speechiness, and instrumentalness
+    song_properties = Song_data[song_index, :]
+
+    song_energy = song_properties[1]
+    energy_similarity = np.abs(song_energy - energy_avgs)
+
+    song_acoustic = song_properties[6]
+    acoustic_similarity = np.abs(song_acoustic - acoustic_avgs)
+
+    song_speech = song_properties[5]
+    speech_similarity = np.abs(song_speech - speech_avgs)
+
+    song_instrument = song_properties[7]
+    instrument_similarity = np.abs(song_instrument - instrument_avgs)
+
+    similarity_score = (
+        energy_similarity
+        + acoustic_similarity
+        + speech_similarity
+        + instrument_similarity
+    )
+    best_match = np.argmin(similarity_score)
+
+    return genre_names[best_match]
+
+
+# testing
+genre = Genre_Predictor("Many Men")
+print(genre)
+
+
+#%% Graphics
+
 x_pos = np.arange(len(genre_names))
 
 # plotting
@@ -115,7 +171,6 @@ ax3.set_ylabel("Speechiness")
 ax4.bar(x_pos, instrument_avgs)
 ax4.set_xticks(x_pos, genre_names)
 ax4.set_ylabel("Instrumentalness")
-plt.show()
 
 
 # plotting separation from averages for each genre to find outliers
