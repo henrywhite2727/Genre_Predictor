@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "genre_predictor"
+authors = [
+    {name = "Henry White", email = "henrywhite@sidratresearch.com"},
+]
+description = "My package description"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    "Framework :: Django",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "requests",
+    'numpy',
+    "scipy",
+    "pytest",
+    'importlib-metadata; python_version<"3.8"',
+]
+dynamic = ["version"]

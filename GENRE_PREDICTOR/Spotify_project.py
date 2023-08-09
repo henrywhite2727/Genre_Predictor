@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 
 # Loading all data into one array
 Song_data = np.loadtxt(
-    "data/genres_v2.csv",
+    "genre_predictor/data/genres_v2.csv",
     skiprows=1,
     delimiter=",",
     usecols=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
     encoding="utf8",
 )
 Song_names = np.loadtxt(
-    "data/genres_v2.csv",
+    "genre_predictor/data/genres_v2.csv",
     dtype=str,
     skiprows=1,
     delimiter=",",
