@@ -171,6 +171,8 @@ ax3.set_ylabel("Speechiness")
 ax4.bar(x_pos, instrument_avgs)
 ax4.set_xticks(x_pos, genre_names)
 ax4.set_ylabel("Instrumentalness")
+plt.show()
 
 
 # plotting separation from averages for each genre to find outliers
+
