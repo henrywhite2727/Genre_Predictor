@@ -66,26 +66,36 @@ def get_avgs():
     return all_avg_metrics
 
 
-def get_similarity_score(
-    Song_data, song_index: int, energy_avgs, acoustic_avgs, speech_avgs, instrument_avgs
-):
+def get_similarity_score(Song_data, all_avg_metrics, song_index):
     # calculating similarity scores for energy, acoustic, speechiness, and instrumentalness
+
     song_properties = Song_data[song_index, :]
 
-    song_energy = song_properties[1]
-    energy_similarity = np.abs(song_energy - energy_avgs)
+    dance_similarity = np.abs(song_properties[0] - all_avg_metrics[:, 0])
 
-    song_acoustic = song_properties[6]
-    acoustic_similarity = np.abs(song_acoustic - acoustic_avgs)
+    energy_similarity = np.abs(song_properties[1] - all_avg_metrics[:, 1])
 
-    song_speech = song_properties[5]
-    speech_similarity = np.abs(song_speech - speech_avgs)
+    loud_similarity = np.abs(song_properties[3] - all_avg_metrics[:, 3])
 
-    song_instrument = song_properties[7]
-    instrument_similarity = np.abs(song_instrument - instrument_avgs)
+    speech_similarity = np.abs(song_properties[5] - all_avg_metrics[:, 5])
+
+    acoustic_similarity = np.abs(song_properties[6] - all_avg_metrics[:, 6])
+
+    instrument_similarity = np.abs(song_properties[7] - all_avg_metrics[:, 7])
+
+    live_similarity = np.abs(song_properties[8] - all_avg_metrics[:, 8])
+
+    valence_similarity = np.abs(song_properties[9] - all_avg_metrics[:, 9])
+
+    tempo_similarity = np.abs(song_properties[10] - all_avg_metrics[:, 8])
 
     similarity_score = (
-        energy_similarity
+        dance_similarity
+        + loud_similarity
+        + live_similarity
+        + valence_similarity
+        + tempo_similarity
+        + energy_similarity
         + acoustic_similarity
         + speech_similarity
         + instrument_similarity
@@ -117,11 +127,10 @@ genre_names = get_genre_names()
 ) = get_genre_data()
 
 
-song_index = 200000  # initializing variable that holds the index of the song we are trying to predict the genre of
-
 # Creating genre predictor function
 def Genre_Predictor(song_name: str):
     # finding specific song within data set
+    song_index = 200000  # initializing variable that holds the index of the song we are trying to predict the genre of
     for i in range(len(Song_names)):
         if song_name == Song_names[i]:
             song_index = i
@@ -131,7 +140,9 @@ def Genre_Predictor(song_name: str):
             "Song name provided is not in the catalogued list so is not a valid input."
         )
 
-    similarity_score = get_similarity_score(Song_data)
+    all_avg_metrics = get_avgs()
+
+    similarity_score = get_similarity_score(Song_data, all_avg_metrics, song_index)
 
     best_match = np.argmin(similarity_score)
 
