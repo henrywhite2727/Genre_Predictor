@@ -1,5 +1,6 @@
-from importing import get_genre_data, get_genre_names
+from genre_predictor.importing import get_genre_data, get_genre_names
 import numpy as np
+
 
 (
     (
@@ -63,11 +64,34 @@ def get_avgs():
 
         all_avg_metrics[i, :] = avg_metric
 
+    # print("All Avg Metrics:", all_avg_metrics)
+
     return all_avg_metrics
 
 
+def make_weights_array():
+    N_weights = 20  # this variable controls the number of different weights we want to test per loop
+
+    weights = np.zeros(
+        (N_weights, 9)
+    )  # this will be a array of size 100 x N_properties (it has 100 rows so I can loop over all potential weights)
+    for i in range(9):
+        weights[:, i] = np.linspace(
+            -5, 5, N_weights
+        )  # the range [-5,5] was picked somewhat arbitrarily
+
+    return weights
+
+
+# this function is TBD
+def find_optimal_weights(weights):
+    for a in range(len(weights[:, a])):
+        h = 1
+
+
 def get_similarity_score(Song_data, all_avg_metrics, song_index):
-    # calculating similarity scores for energy, acoustic, speechiness, and instrumentalness
+    # calculating similarity scores for musical statistics (energy, speechiness, etc.)
+    # a lower similarity score means things are MORE similar
 
     song_properties = Song_data[song_index, :]
 

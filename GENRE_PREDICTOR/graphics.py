@@ -1,9 +1,52 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from importing import get_genre_names
-from algorithms import get_avgs
+from genre_predictor.importing import get_genre_names, get_genre_data
+from genre_predictor.algorithms import get_avgs
+import scipy.stats
 
 all_avg_metrics = get_avgs()
+
+genre_names = get_genre_names()
+
+(
+    (
+        DarkTrap,
+        Und_rap,
+        TrapMetal,
+        Emo,
+        Rap,
+        RnB,
+        Pop,
+        Hiphop,
+        Techhouse,
+        Techno,
+        Trance,
+        Psytrance,
+        Trap,
+        Dnb,
+        Hardstyle,
+    ),
+    Song_data,
+    Song_names,
+) = get_genre_data()
+
+Genre_data = [
+    DarkTrap,
+    Und_rap,
+    TrapMetal,
+    Emo,
+    Rap,
+    RnB,
+    Pop,
+    Hiphop,
+    Techhouse,
+    Techno,
+    Trance,
+    Psytrance,
+    Trap,
+    Dnb,
+    Hardstyle,
+]
 
 genre_names = get_genre_names()
 
@@ -12,6 +55,9 @@ energy_avgs = all_avg_metrics[:, 1]
 acoustic_avgs = all_avg_metrics[:, 6]
 speech_avgs = all_avg_metrics[:, 5]
 instrument_avgs = all_avg_metrics[:, 7]
+
+
+
 
 #%% Graphics
 def make_genre_comparison_plot(plot_desired: bool):
@@ -40,4 +86,15 @@ def make_genre_comparison_plot(plot_desired: bool):
         ax4.set_xticks(x_pos, genre_names)
         ax4.set_ylabel("Instrumentalness")
         plt.show()
+
+
+def make_moment_plot(Genre_Data: np.ndarray, genre_names: list):
+    """_summary_
+
+    Args:
+        Genre_Data (np.ndarray): A list of arrays that contains all of the property data for each genre
+        genre_names (list): A list of strings that containes the name of each genre
+    """
+
+    plt.bar()
 
