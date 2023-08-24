@@ -26,9 +26,9 @@ def get_genre_names():
 
 genre_names = get_genre_names()
 
+
 # Splitting song data into genres (and ignoring unnecessary columns in data set)
 def get_genre_data():
-
     # Loading all data into one array
     Song_data = np.loadtxt(
         "genre_predictor/data/genres_v2.csv",

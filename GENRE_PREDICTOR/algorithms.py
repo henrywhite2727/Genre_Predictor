@@ -171,3 +171,77 @@ def Genre_Predictor(song_name: str):
     best_match = np.argmin(similarity_score)
 
     return genre_names[best_match]
+
+
+def get_medians(Song_data: np.ndarray, property_indices: list, genre_indices: list):
+    """You will one day expand this function to make your AI work for all genres. Today is not that day
+
+    Args:
+        Song_data (np.ndarray): _description_
+        property_indices (list): The indices of the properties being considered for this case (for now it is acousticness, instrumentalness, and valence)
+        genre_indices (list): The indices of the genres we are trying to guess between (Techno and Rap for now)
+    """
+    medians = np.ones((len(genre_indices), len(property_indices)))
+    for i in range(len(genre_indices)):
+        for j in property_indices:
+            medians[i, k] = np.median()
+
+
+def get_likelihood(Song_data: np.ndarray, song_index: int):
+    property_indices = [
+        6,
+        7,
+        9,
+    ]  # just considering acousticness, instrumentalness, and valence for now
+    genre_indices = [4, 9]  # just conisdering rap and Techno for now
+
+    # #I will save the code below for when I expand my genre_predictor to have more than 2 genres
+    # medians = get_medians(
+    #     Song_data, property_indices, genre_indices
+    # )  # 2d array that stores the property medians for each genre (Num rows=number of genres, Num columns=number of properties being considered )
+
+    v_m_rap = np.median(Rap[:, 9])  # median valence for rap
+    v_m_techno = np.median(Techno[:, 9])  # median valence for rap
+    v_w = 1  # valence weight
+    a_w = 1  # acosuticness weight
+    a_m_rap = np.median(Rap[:, 6])
+    a_m_techno = np.median(Techno[:, 9])  # median valence for rap
+    i_w = 1
+    i_m_rap = np.median(Rap[:, 7])
+    i_m_techno = np.median(Techno[:, 9])  # median valence for rap
+
+    likelihood_rap = (
+        1 / (v_w * (Song_data[song_index, 9] - v_m_rap) ** 2)
+        + (a_w * (Song_data[song_index, 6] - a_m_rap) ** 2)
+        + (i_w * (Song_data[song_index, 7] - i_m_rap) ** 2)
+    )
+
+    likelihood_techno = (
+        1 / (v_w * (Song_data[song_index, 9] - v_m_techno) ** 2)
+        + (a_w * (Song_data[song_index, 6] - a_m_techno) ** 2)
+        + (i_w * (Song_data[song_index, 7] - i_m_techno) ** 2)
+    )
+
+    return [likelihood_rap, likelihood_techno]
+
+
+def Techno_Or_Rap(song_name: str):
+    # finding specific song within data set
+    song_index = 200000  # initializing variable that holds the index of the song we are trying to predict the genre of
+    for i in range(len(Song_names)):
+        if song_name == Song_names[i]:
+            song_index = i
+            break
+    if song_index == 200000:
+        print(
+            "Song name provided is not in the catalogued list so is not a valid input."
+        )
+
+    genre_likelihoods = np.zeros(
+        len(genre_names)
+    )  # genre_likelihoods is going to be an array that will record the likelihood that the chosen song is within each genre
+    genre_likelihood = get_likelihood(Song_data, song_index)
+    if genre_likelihood[0] > genre_likelihood[1]:
+        return "rap"
+    else:
+        return "Techno"
