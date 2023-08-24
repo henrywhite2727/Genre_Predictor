@@ -239,7 +239,8 @@ def Techno_Or_Rap(song_name: str):
 
     genre_likelihoods = np.zeros(
         len(genre_names)
-    )  # genre_likelihoods is going to be an array that will record the likelihood that the chosen song is within each genre
+    )  # genre_likelihoods is going to be an array that will record the likelihood that the chosen song is within each genre (note that it is not currently used)
+
     genre_likelihood = get_likelihood(Song_data, song_index)
     if genre_likelihood[0] > genre_likelihood[1]:
         return "rap"
