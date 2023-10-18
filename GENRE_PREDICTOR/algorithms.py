@@ -1,5 +1,6 @@
 from genre_predictor.importing import get_genre_data, get_genre_names
 import numpy as np
+from scipy.stats import kstest
 
 
 (
@@ -187,7 +188,7 @@ def get_medians(Song_data: np.ndarray, property_indices: list, genre_indices: li
             medians[i, k] = np.median()
 
 
-def get_likelihood(Song_data: np.ndarray, song_index: int):
+def get_likelihood_technorap(Song_data: np.ndarray, song_index: int):
     property_indices = [
         6,
         7,
@@ -202,31 +203,96 @@ def get_likelihood(Song_data: np.ndarray, song_index: int):
 
     v_m_rap = np.median(Rap[:, 9])  # median valence for rap
     v_m_techno = np.median(Techno[:, 9])  # median valence for rap
-    v_w = 1  # valence weight
-    a_w = 1  # acosuticness weight
+    v_w = 0.00001  # valence weight
+    a_w = 0.00001  # acosuticness weight
+    i_w = 1000  # instrumentalness weight
     a_m_rap = np.median(Rap[:, 6])
     a_m_techno = np.median(Techno[:, 9])  # median valence for rap
-    i_w = 1
+
     i_m_rap = np.median(Rap[:, 7])
     i_m_techno = np.median(Techno[:, 9])  # median valence for rap
 
-    likelihood_rap = (
-        1 / (v_w * (Song_data[song_index, 9] - v_m_rap) ** 2)
-        + (a_w * (Song_data[song_index, 6] - a_m_rap) ** 2)
-        + (i_w * (Song_data[song_index, 7] - i_m_rap) ** 2)
+    # The 0.0000001 is used to avoid dividing by zero
+    likelihood_rap = 1 / (
+        (v_w * (Song_data[song_index, 9] - v_m_rap + 0.0000000001) ** 2)
+        + (a_w * (Song_data[song_index, 6] - a_m_rap + 0.0000000001) ** 2)
+        + (i_w * (Song_data[song_index, 7] - i_m_rap + 0.0000000001) ** 2)
     )
 
-    likelihood_techno = (
-        1 / (v_w * (Song_data[song_index, 9] - v_m_techno) ** 2)
-        + (a_w * (Song_data[song_index, 6] - a_m_techno) ** 2)
-        + (i_w * (Song_data[song_index, 7] - i_m_techno) ** 2)
+    likelihood_techno = 1 / (
+        (v_w * (Song_data[song_index, 9] - v_m_techno + 0.0000000001) ** 2)
+        + (a_w * (Song_data[song_index, 6] - a_m_techno + 0.0000000001) ** 2)
+        + (i_w * (Song_data[song_index, 7] - i_m_techno + 0.0000000001) ** 2)
     )
 
     return [likelihood_rap, likelihood_techno]
 
 
-def Techno_Or_Rap(song_name: str):
-    # finding specific song within data set
+def get_likelihood_emorap(Song_data: np.ndarray, song_index: int):
+    d_m_rap = np.median(
+        Rap[(len(Rap) // 2) :, 0]
+    )  # median danceability for rap (note that the second half of the data set is the "training dataset")
+    e_m_rap = np.median(Rap[(len(Rap) // 2) :, 1])
+    s_m_rap = np.median(Rap[(len(Rap) // 2) :, 5])
+
+    d_w = 1000  # danceability weight
+    e_w = 1000  # energy weight
+    s_w = 1000  # speechiness weight
+
+    d_w, e_w, s_w = get_weights_kstest(Rap, Emo, [0, 1, 5])
+
+    d_m_emo = np.median(Emo[(len(Emo) // 2) :, 0])
+    e_m_emo = np.median(Emo[(len(Emo) // 2) :, 1])
+    s_m_emo = np.median(Emo[(len(Rap) // 2) :, 5])
+
+    # The 0.0000001 is used to avoid dividing by zero
+    likelihood_rap = 1 / (
+        (d_w * (Song_data[song_index, 0] - d_m_rap + 0.0000000001) ** 2)
+        + (e_w * (Song_data[song_index, 1] - e_m_rap + 0.0000000001) ** 2)
+        + (s_w * (Song_data[song_index, 5] - s_m_rap + 0.0000000001) ** 2)
+    )
+
+    likelihood_emo = 1 / (
+        (d_w * (Song_data[song_index, 0] - d_m_emo + 0.0000000001) ** 2)
+        + (e_w * (Song_data[song_index, 1] - e_m_emo + 0.0000000001) ** 2)
+        + (s_w * (Song_data[song_index, 5] - s_m_emo + 0.0000000001) ** 2)
+    )
+
+    return [likelihood_rap, likelihood_emo]
+
+
+def get_weights_kstest(
+    data_genre1: np.ndarray, data_genre2: np.ndarray, property_indices: list
+):
+    """This function calculates the weight for a specific property (i.e. how useful this property is for distinguishing between two genres).
+    This is done using a KS test which is a useful for statistical tool for comparing two different distributions
+
+    Args:
+        data_genre1 (np.ndarray): _description_
+        data_genre2 (np.ndarray): _description_
+        property_indices (list): list of indices associated with different properties (for dance and energy and speechiness, the list would be [0,1,5]). This
+
+    Returns:
+        _type_: _description_
+    """
+    weight0 = kstest(
+        data_genre1[0:500, property_indices[0]], data_genre2[0:500, property_indices[0]]
+    )
+    weight1 = kstest(
+        data_genre1[0:500, property_indices[1]], data_genre2[0:500, property_indices[1]]
+    )
+    weight2 = kstest(
+        data_genre1[0:500, property_indices[2]], data_genre2[0:500, property_indices[2]]
+    )
+    return [weight0[0] * 1000, weight1[0] * 1000, weight2[0] * 1000]
+
+
+def get_song_index(song_name: str):
+    """This function find the index of a song within the database. It searches the database based on title and records the corresponding index once it finds it.
+
+    Args:
+        song_name (str): _description_
+    """
     song_index = 200000  # initializing variable that holds the index of the song we are trying to predict the genre of
     for i in range(len(Song_names)):
         if song_name == Song_names[i]:
@@ -236,13 +302,52 @@ def Techno_Or_Rap(song_name: str):
         print(
             "Song name provided is not in the catalogued list so is not a valid input."
         )
+    return song_index
+
+
+def Techno_Or_Rap(song_name: str):
+    # finding specific song within data set
+    song_index = get_song_index(song_name)
 
     genre_likelihoods = np.zeros(
         len(genre_names)
     )  # genre_likelihoods is going to be an array that will record the likelihood that the chosen song is within each genre (note that it is not currently used)
 
-    genre_likelihood = get_likelihood(Song_data, song_index)
+    genre_likelihood = get_likelihood_technorap(Song_data, song_index)
     if genre_likelihood[0] > genre_likelihood[1]:
         return "rap"
     else:
         return "Techno"
+
+
+def Emo_or_rap(song_name: str):
+    # finding specific song within data set
+    song_index = get_song_index(song_name)
+    genre_likelihoods = np.zeros(
+        len(genre_names)
+    )  # genre_likelihoods is going to be an array that will record the likelihood that the chosen song is within each genre (note that it is not currently used)
+
+    genre_likelihood = get_likelihood_emorap(Song_data, song_index)
+    if genre_likelihood[0] > genre_likelihood[1]:
+        return "rap"
+    else:
+        return "emo"
+
+
+def get_likelihood(genre_data1: np.ndarray, genre_data2: np.ndarray):
+    # calculating median values for each song property (for each genre)
+    medians_1 = np.zeros(
+        7
+    )  # there are 7 relevant properties for each song (danceability, energy,...)
+    medians_2 = np.zeros(7)
+    property_indices = [0, 1, 5, 6, 7, 8, 9]
+
+    for i, item in enumerate(property_indices):
+        medians_1[i] = np.median(genre_data1[(len(genre_data1) // 2) :, item])
+        medians_2[i] = np.median(genre_data2[(len(genre_data2) // 2) :, item])
+
+    # next steps
+    # 1. expand get_wights_kstest to all properties
+    # 2. Create general likelihood function based on all properties
+    # 3. Split the median code above into its own function
+    # 4. test our new general genre comparison algorithm
